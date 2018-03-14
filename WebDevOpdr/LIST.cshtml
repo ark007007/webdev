@@ -1,0 +1,53 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    @{
+        string action = "";
+        bool allowEdit = false;
+        int List_id = Request.QueryString["List"].AsInt();
+        action = Request.QueryString["action"];
+        if (action == "edit")
+        {
+            if (WebSecurity.CurrentUserId == List_id)
+            {
+                allowEdit = true;
+                if (IsPost)
+                {
+                    if(Request.Form["act"] == "add")
+                    {
+                        //voer query uit om item toetevoegen 
+                    }
+                }
+            }
+            else
+            {
+                Response.Redirect("~/default");
+            }
+        }
+    }  
+    @if (allowEdit)
+    {
+        <div class="edit">
+            <form method="post">
+                <input type="hidden" value="add" name="action"/>
+                Item naam<input type="text" name="item"/><br />
+                hoe belangrijk<input type="number" name="value"/><br />
+                <input type="submit"/><br />
+            </form>
+
+        </div>
+    }
+    else
+    {
+
+    }
+
+
+
+
+</body>
+</html>
