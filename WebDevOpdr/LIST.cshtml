@@ -47,7 +47,7 @@
         <td>id</td><td>ItemName</td><td>ItemValue</td>
         </tr>
 
-            @foreach(var row in db.Query("SELECT * FROM ListOfThings"))
+            @foreach(var row in db.Query("SELECT * FROM ListOfThings WHERE User_id = @0", List_id))
             {
             <tr> 
             <td>@row.Id</td> 
