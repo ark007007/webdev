@@ -10,6 +10,8 @@
         bool allowEdit = false;
         int List_id = Request.QueryString["List"].AsInt();
         action = Request.QueryString["action"];
+        var db = Database.Open("Todo");
+
         if (action == "edit")
         {
             if (WebSecurity.CurrentUserId == List_id)
@@ -17,18 +19,24 @@
                 allowEdit = true;
                 if (IsPost)
                 {
-                    if(Request.Form["act"] == "add")
+                    if(Request.Form["action"] == "add")
                     {
                         //voer query uit om item toetevoegen
                         //Item toevoegen aan Database 
                         // - Item dat paar wil moet worden toegevoegd
-                        var db = Database.Open("Todo");
-                        var value = Request.Form["item"];
-
-                        var insertQuery = "INSERT INTO ListOfThings (ItemName)";
-                        db.Execute(insertQuery, item);
+                        var item = Request.Form["item"];
+                        var value = Request.Form["value"];
+                        var insertQuery = "INSERT INTO ListOfThings (ItemName, ItemValue, User_id) VALUES (@0, @1, @2)";
+                        db.Execute(insertQuery, item, value, WebSecurity.CurrentUserId);
 
                     }
+
+                }
+                if (Request.QueryString["act"] == "del")
+                {
+                    var id = Request.QueryString["id"];
+                    var delQuery = "Delete From ListOfThings where id = @0";
+                    db.Execute(delQuery, id);
                 }
             }
             else
@@ -36,34 +44,52 @@
                 Response.Redirect("~/default");
             }
         }
-        var db = Database.Open("Todo");
     }  
     @if (allowEdit)
     {
         <div class="edit">
             <form method="post">
                 <input type="hidden" value="add" name="action"/>
-                Item naam<input type="text" name="item"/><br />
-                hoe belangrijk<input type="number" name="value"/><br />
+                Item naam <input type="text" name="item"/><br />
+                Prioriteit <input type="number" name="value"/><br />
                 <input type="submit"/><br />
             </form>
 
         </div>
     }
-    <table>
+        <table>
+            <tr>
+                <td>id</td>
+                <td>ItemName</td>
+                <td>ItemValue</td>
+                <td>taken</td>
+            </tr>
+            @if (WebSecurity.CurrentUserId != List_id)
+    {
+        foreach (var row in db.Query("SELECT * FROM ListOfThings WHERE User_id = @0 and Taken = 0 ORDER BY ItemValue DESC", List_id))
+{
         <tr>
-        <td>id</td><td>ItemName</td><td>ItemValue</td>
+            <td>@row.Id</td>
+            <td>@row.ItemName</td>
+            <td>@row.ItemValue</td>
+            <td>@row.Taken</td>
         </tr>
+}
+}
+else
+{
+        foreach (var row in db.Query("SELECT * FROM ListOfThings WHERE User_id = @0 ORDER BY ItemValue DESC", List_id))
+{
+        <tr>
+            <td>@row.Id</td>
+            <td>@row.ItemName</td>
+            <td>@row.ItemValue</td>
+            <td><a href="/LIST?action=edit&act=del&list=@WebSecurity.CurrentUserId&id=@row.Id">delete</a></td>
+        </tr>
+}
+}
 
-            @foreach(var row in db.Query("SELECT * FROM ListOfThings WHERE User_id = @0", List_id))
-            {
-            <tr> 
-            <td>@row.Id</td> 
-            <td>@row.ItemName</td> 
-            <td>@row.ItemValue</td> 
-            </tr> 
-            }
-    </table>
+        </table>
 
 
 
