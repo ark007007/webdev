@@ -19,7 +19,15 @@
                 {
                     if(Request.Form["act"] == "add")
                     {
-                        //voer query uit om item toetevoegen 
+                        //voer query uit om item toetevoegen
+                        //Item toevoegen aan Database 
+                        // - Item dat paar wil moet worden toegevoegd
+                        var db = Database.Open("Todo");
+                        var value = Request.Form["item"];
+
+                        var insertQuery = "INSERT INTO ListOfThings (ItemName)";
+                        db.Execute(insertQuery, item);
+
                     }
                 }
             }
